@@ -1,0 +1,41 @@
+# Maven
+target/
+**/target/
+
+# Eclipse
+.classpath
+.project
+.settings/
+.factorypath
+
+# Spring Tool Suite
+.springBeans
+.sts4-cache/
+
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment / secrets
+.env
+*.env
+
+# Temporary files
+*.tmp
+*.swp
+# Additional Java / Spring ignores
+*.class
+.env.*
+application-local.properties
+application-prod.properties
