@@ -13,38 +13,44 @@ jobs:
     name: Build and Test FinCore
     runs-on: ubuntu-latest
 
-    steps:
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
 
+    steps:
       - name: Checkout source code
         uses: actions/checkout@v4
 
       - name: Set up Java 8
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '8'
           cache: maven
 
-      - name: Build User Service
-        working-directory: user-service
-        run: mvn clean verify
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; then
+              echo "MySQL is ready"
+              break
+            fi
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
 
-      - name: Build Wallet Service
-        working-directory: wallet-service
-        run: mvn clean verify
+      - name: Create FinCore databases
+        run: |
+          mysql -h 127.0.0.1 -uroot -proot -e "
+          CREATE DATABASE IF NOT EXISTS vaultopay;
 
-      - name: Build Transaction Service
-        working-directory: transaction-service
-        run: mvn clean verify
 
-      - name: Build Payment Service
-        working-directory: payment-service
-        run: mvn clean verify
-
-      - name: Build Eureka Server
-        working-directory: eureka-server
-        run: mvn clean verify
-
-      - name: Build API Gateway
-        working-directory: api-gateway
-        run: mvn clean verify
