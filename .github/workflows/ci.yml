@@ -1,0 +1,50 @@
+name: FinCore CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and Test FinCore
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+          cache: maven
+
+      - name: Build User Service
+        working-directory: user-service
+        run: mvn clean verify
+
+      - name: Build Wallet Service
+        working-directory: wallet-service
+        run: mvn clean verify
+
+      - name: Build Transaction Service
+        working-directory: transaction-service
+        run: mvn clean verify
+
+      - name: Build Payment Service
+        working-directory: payment-service
+        run: mvn clean verify
+
+      - name: Build Eureka Server
+        working-directory: eureka-server
+        run: mvn clean verify
+
+      - name: Build API Gateway
+        working-directory: api-gateway
+        run: mvn clean verify
