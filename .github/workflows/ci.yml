@@ -13,20 +13,8 @@ jobs:
     name: Build and Test FinCore
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
-
     steps:
+
       - name: Checkout source code
         uses: actions/checkout@v4
 
@@ -37,20 +25,45 @@ jobs:
           java-version: '8'
           cache: maven
 
-      - name: Wait for MySQL
+      - name: Start MySQL
         run: |
-          for i in {1..30}; do
-            if mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; then
-              echo "MySQL is ready"
-              break
-            fi
-            echo "Waiting for MySQL..."
-            sleep 2
-          done
+          sudo systemctl start mysql
+          sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';"
+          sudo mysql -uroot -proot -e "SELECT VERSION();"
 
       - name: Create FinCore databases
         run: |
-          mysql -h 127.0.0.1 -uroot -proot -e "
+          mysql -uroot -proot -e "
           CREATE DATABASE IF NOT EXISTS vaultopay;
+          CREATE DATABASE IF NOT EXISTS fincore_wallet;
+          CREATE DATABASE IF NOT EXISTS fincore_transaction;
+          CREATE DATABASE IF NOT EXISTS fincore_payment;
+          "
 
+      - name: Verify MySQL connection
+        run: |
+          mysql -h 127.0.0.1 -uroot -proot -e "SHOW DATABASES;"
 
+      - name: Build User Service
+        working-directory: user-service
+        run: mvn clean verify
+
+      - name: Build Wallet Service
+        working-directory: wallet-service
+        run: mvn clean verify
+
+      - name: Build Transaction Service
+        working-directory: transaction-service
+        run: mvn clean verify
+
+      - name: Build Payment Service
+        working-directory: payment-service
+        run: mvn clean verify
+
+      - name: Build Eureka Server
+        working-directory: eureka-server
+        run: mvn clean verify
+
+      - name: Build API Gateway
+        working-directory: api-gateway
+        run: mvn clean verify
