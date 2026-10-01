@@ -193,7 +193,7 @@ class WalletServiceTest {
         wallet2.setCurrency("EUR");
         wallet2.setBalance(new BigDecimal("500"));
 
-        when(walletRepository.findAll())
+        when(walletRepository.findByUserId(2L))
                 .thenReturn(Arrays.asList(wallet, wallet2));
 
         List<Wallet> result =
@@ -203,6 +203,6 @@ class WalletServiceTest {
         assertEquals(2, result.size());
 
         verify(walletRepository)
-                .findAll();
+                .findByUserId(2L);
     }
 }
