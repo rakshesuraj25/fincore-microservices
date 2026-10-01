@@ -40,10 +40,7 @@ public class WalletService {
 
     public List<Wallet> getWalletsByUser(Long userId) {
 
-        return walletRepository.findAll()
-                .stream()
-                .filter(wallet -> wallet.getUserId().equals(userId))
-                .toList();
+        return walletRepository.findByUserId(userId);
     }
 
     public Wallet addMoney(Long walletId, BigDecimal amount) {
