@@ -39,7 +39,7 @@ class TransactionServiceTest {
 
         transaction = new Transaction();
 
-        transaction.setUserId(42L);
+        transaction.setId(42L);
         transaction.setUserId(2L);
         transaction.setWalletId(2L);
         transaction.setType("DEPOSIT");
